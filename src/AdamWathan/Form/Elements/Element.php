@@ -13,6 +13,19 @@ abstract class Element
         $this->attributes[$attribute] = $value;
     }
 
+    public function getAttribute($attribute)
+    {
+        if (isset($this->attributes[$attribute])) {
+            return $this->attributes[$attribute];
+        }
+        return null;
+    }
+
+    public function getType()
+    {
+        return $this->getAttribute('type');
+    }
+
     protected function removeAttribute($attribute)
     {
         unset($this->attributes[$attribute]);
@@ -40,23 +53,32 @@ abstract class Element
         return $this;
     }
 
-    public function addClass($class)
+    protected function classesToArray()
     {
         if (isset($this->attributes['class'])) {
-            $class = $this->attributes['class'] . ' ' . $class;
+            return explode(' ', $this->attributes['class']);
         }
+        return array();
+    }
 
-        $this->setAttribute('class', $class);
+    protected function arrayToClass($classes)
+    {
+        return implode(' ', array_unique($classes));
+    }
+
+    public function addClass($class)
+    {
+        $classes = $this->classesToArray();
+        $classes[] = $class;
+        $this->setAttribute('class', $this->arrayToClass($classes));
         return $this;
     }
 
     public function removeClass($class)
     {
-        if (! isset($this->attributes['class'])) {
-            return $this;
-        }
-        $class = trim(str_replace($class, '', $this->attributes['class']));
-        $this->setAttribute('class', $class);
+        $classes = $this->classesToArray();
+        $classes = array_diff($classes, array($class));
+        $this->setAttribute('class', $this->arrayToClass($classes));
         return $this;
     }
 
